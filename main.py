@@ -6,7 +6,7 @@ from scipy import linalg as spl
 '''
 Single-user point-to-point MIMO simulation based on paper:
 "Hybrid Digital and Analog Beamforming Design for Large-Scale Antenna Arrays"
-Damian Filo, 3121999276
+Damian Filo
 '''
 
 '''
