@@ -53,4 +53,3 @@ Figure 3  Simulation result data of our code.
 ## Conclusion
 I believe this paper introduced an essential approach enabling wider adoption of large MIMO mmWave antennas by lowering their cost. Although with compromising a bit of spectral efficiency, the cost savings for equipment should be more than enough to compensate.
 
-***If this work was helpful for you, do not forget to star this repo, thanks!***
