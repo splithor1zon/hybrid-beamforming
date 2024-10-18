@@ -1,3 +1,5 @@
+*Accepting suggestions, just create a new issue.* 🤝
+
 # Hybrid Beamforming Demo
 Partial implementation of the paper "Sohrabi, Foad, & Yu, Wei (2016). Hybrid Digital and Analog Beamforming Design for Large-Scale Antenna Arrays" in python. For additional information check the comments in the code.
 
