@@ -4,6 +4,8 @@
 
 Partial implementation of the paper "Sohrabi, Foad, & Yu, Wei (2016). Hybrid Digital and Analog Beamforming Design for Large-Scale Antenna Arrays" in python. For additional information check the comments in the code.
 
+This README contains a brief documentation about the topic and the coding process. As I am not an expert in this area of study, the documentation/code might be faulty, I would appreciate any feedback. Thank you.
+
 ## Motivation
 
 The shift towards usage of millimeter wave introduces new problems into the wireless communications. Many of these problems can be solved using large-scale antenna arrays using beamforming for optimal performance. These antenna arrays are though expensive and the high cost can be largely explained by the requirement of a RF chain stack for each antenna. The cost quickly becomes unsustainable for ever larger arrays. This paper proposes using hybrid analog/digital solution, which aims to perform similarly to fully digital (RF stack for each antenna) with the cost saving advantage of grouping multiple antennas using single RF stack. Moreover, the authors propose lowering the density of analog phase-shifters to lower the cost even further at the cost of some performance. Essentially, it is focused on lowering the cost of these solutions, while trying to preserve the performance of more expensive solutions.

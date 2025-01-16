@@ -1,31 +1,44 @@
+"""
+Implementation of single-user point-to-point MIMO simulation based on paper:
+"Sohrabi, F., & Yu, W. (2016). Hybrid Digital and Analog Beamforming Design for Large-Scale Antenna Arrays"
+Implemented algorithms are 'Algorithm 1' and 'Algorithm 2' from the paper.
+Original code, Damian Filo, 2022
+
+Comments often refer to specific figures and equations from the paper, as "(x)".
+"""
+
 #%% Imports and functions
+from typing import Tuple
 import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 from scipy import linalg as spl
-'''
-Single-user point-to-point MIMO simulation based on paper:
-"Sohrabi, F., & Yu, W. (2016). Hybrid Digital and Analog Beamforming Design for Large-Scale Antenna Arrays"
-Damian Filo
-'''
 
-'''
-The alg1 function is an implementation of 'Algorithm 1' from the paper.
-The algorithm is further implementation of optimization problem used for 
-approximating analog precoder matrix Vrf, and the number of rf chains (Nrf) is equal
-to the number of data streams (Ns).
+def alg1(F: np.ndarray, Ns: int, gamma_sq: float, sigma_sq: float, epsilon: float = 1e-3) -> np.ndarray:
+    """
+    The alg1 function is an implementation of 'Algorithm 1' from the paper.
+    The algorithm is further implementation of optimization problem used for 
+    approximating analog precoder matrix Vrf, and the number of rf chains (Nrf) is equal
+    to the number of data streams (Ns).
 
-Requires:
-    F - Either F1 or F2 type matrix as explained in the paper near equation (12) and (15).
-    Ns - Number of data streams.
-    gamma_sq - Signal amplitude squared.
-    sigma_sq - Noise standard deviation squared.
-    epsilon - Stopping condition.
+    Parameters
+    ----------
+    F : numpy.ndarray
+        Either F1 or F2 type matrix as explained in the paper near equation (12) and (15).
+    Ns : int
+        Number of data streams.
+    gamma_sq : float
+        Signal amplitude squared.
+    sigma_sq : float
+        Noise standard deviation squared.
+    epsilon : float
+        Stopping condition. The default is 1e-3.
 
-Returns:
-    Vrf - Approximation of analog precoder matrix.
-'''
-def alg1(F, Ns, gamma_sq, sigma_sq, epsilon=1e-3):
+    Returns
+    -------
+    Vrf : numpy.ndarray
+        Approximation of analog precoder matrix.
+    """
     Nrf = Ns
     # Initialize Vrf
     Vrf = np.ones((F.shape[0], Nrf), dtype=np.complex128)
@@ -60,23 +73,31 @@ def alg1(F, Ns, gamma_sq, sigma_sq, epsilon=1e-3):
         diff = abs((iter_obj - last_iter_obj) / iter_obj)
     return Vrf
 
-'''
-The alg2 function is an implementation of 'Algorithm 2' from the paper.
-The goal of this algorithm is to incorporate the environment and compute receiving signal matrices.
-Using the knowledge gained the algorithm computes the spectral efficiency metric, 
-when the number of rf chains (Nrf) is equal to the number of data streams (Ns).
+def alg2(H: np.ndarray, Ns: int, P: float, sigma_sq: float, epsilon: float = 1e-3) -> float:
+    """
+    The alg2 function is an implementation of 'Algorithm 2' from the paper.
+    The goal of this algorithm is to incorporate the environment and compute receiving signal matrices.
+    Using the knowledge gained the algorithm computes the spectral efficiency metric, 
+    when the number of rf chains (Nrf) is equal to the number of data streams (Ns).
 
-Requires:
-    H - Environment matrix
-    Ns - Number of data streams.
-    P - Broadcast power.
-    sigma_sq - Noise standard deviation squared.
-    epsilon - Stopping condition.
+    Parameters
+    ----------
+    H : numpy.ndarray
+        Environment matrix.
+    Ns : int
+        Number of data streams.
+    P : float
+        Broadcast power.
+    sigma_sq : float
+        Noise standard deviation squared.
+    epsilon : float
+        Stopping condition. The default is 1e-3.
 
-Returns:
-    R - Spectral efficiency (bits/s/Hz)
-'''
-def alg2(H, Ns, P, sigma_sq, epsilon=1e-3):
+    Returns
+    -------
+    R : float
+        Spectral efficiency (bits/s/Hz)
+    """
     Nrf = Ns
     gamma = (P / (H.shape[1] * Nrf))**0.5
 
@@ -113,21 +134,30 @@ def alg2(H, Ns, P, sigma_sq, epsilon=1e-3):
     R = np.log2(np.linalg.det(np.identity(H.shape[0]) + (1/sigma_sq) * (Wt @ (np.linalg.inv(Wt.conj().T @ Wt) @ (Wt.conj().T @ (H @ (Vt @ (Vt.conj().T @ H.conj().T))))))))
     return R
 
-'''
-Advanced environment generator with configurable physical variables.
+def enviroGen(N: int, M: int, L: int, d: float = 0.5) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """
+    Advanced environment generator with configurable physical variables.
 
-Requires:
-    N - Number of BS antennas
-    M - Number of receiver antennas
-    L - Number of scatterers
-    d - Antenna spacing distance
+    Parameters
+    ----------
+    N : int
+        Number of BS antennas.
+    M : int
+        Number of receiver antennas.
+    L : int
+        Number of scatterers.
+    d : float
+        Antenna spacing distance. The default is 0.5.
 
-Returns:
-    H - Generated environment (channel)
-    Gain - Complex gain of each path
-    At - Array response vectors
-'''
-def enviroGen(N, M, L, d = 0.5):
+    Returns
+    -------
+    H : numpy.ndarray
+        Generated environment (channel).
+    Gain : numpy.ndarray
+        Complex gain of each path.
+    At : numpy.ndarray
+        Array response vectors.
+    """
     spread = np.pi
     ang = (2*np.random.rand(L, M) - 1) * spread
     Gain = (np.random.randn(L, M) + 1j*np.random.randn(L, M))/2**0.5
@@ -154,7 +184,7 @@ M = 16
 K = 1
 
 # num of data streams per user
-d = 4
+d = 6
 
 # num of data streams 
 Ns = K * d
@@ -164,12 +194,6 @@ L = 15
 
 # stopping (convergence) condition
 epsilon = 1e-4
-
-# generated environment - random normal distribution
-#H = np.random.normal(loc=0, scale=np.sqrt(2)/2, size=(M, N, 2)).view(np.complex128)[:, :, 0]
-
-# generated environment - advanced generation
-H, Gain, At = enviroGen(N, M, L)
 
 # These variables must comply with these invariants:
 # Ns <= Nrft <= N
@@ -186,7 +210,14 @@ arr = np.ndarray(shape=(db_range*2), dtype=np.float64)
 for snr in range(-db_range, db_range):
     P = 10**(snr / 10) * sigma_sq
     for i in range(num_iters):
-        arr[snr+db_range] += alg2(H, Ns, P, sigma_sq, epsilon)
+        # generated environment - random normal distribution
+        #H = np.random.normal(loc=0, scale=np.sqrt(2)/2, size=(M, N, 2)).view(np.complex128)[:, :, 0]
+
+        # generated environment - advanced generation
+        H, Gain, At = enviroGen(N, M, L)
+        
+        a2 = alg2(H, Ns, P, sigma_sq, epsilon)
+        arr[snr+db_range] += a2
     arr[snr+db_range] /= num_iters
     print(str(snr) + "dB: " + str(arr[snr+db_range]))
 
